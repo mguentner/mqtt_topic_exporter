@@ -10,6 +10,7 @@ import (
 	"time"
 	"encoding/json"
 
+	"github.com/satori/go.uuid"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/log"
@@ -67,6 +68,8 @@ func main() {
 	}
 	username := (*mqttServerUri).User.Username()
 	password, _ := (*mqttServerUri).User.Password()
+	newUuid, _ := uuid.NewV4()
+	clientId := newUuid.String()
 
 	log.Infof("value ratain: %d", retainTime)
 
@@ -90,7 +93,7 @@ func main() {
 				Address:   (*mqttServerUri).Host,
 				UserName:  []byte(username),
 				Password:  []byte(password),
-				ClientID:  []byte("client_id"),
+				ClientID:  []byte(clientId),
 			})
 			if err != nil {
 				log.Fatal(err)
