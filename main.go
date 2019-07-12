@@ -5,10 +5,10 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
+	"encoding/json"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -110,7 +110,12 @@ func main() {
 								topicLastHandledMutex.Lock()
 								topicLastHandled[topic] = time.Now()
 								topicLastHandledMutex.Unlock()
-								value, _ := strconv.ParseFloat(string(message), 64)
+
+								// flukso gives "[timestamp, watt, "W"]"
+								var message_arr []float64
+								_ = json.Unmarshal(message, &message_arr)
+
+								value := message_arr[1]
 								mqttGauge.WithLabelValues(topic).Set(value)
 								log.Infof("MQTT TOPIC %s => %f", topic, value)
 							},
